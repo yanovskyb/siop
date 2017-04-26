@@ -1,0 +1,231 @@
+---
+title             : "APA Formatted Manuscripts in R"
+shorttitle        : "Manuscripts in R"
+
+author: 
+  - name          : "Ryan Derickson"
+    affiliation   : "1,2"
+    corresponding : yes    
+    address       : "11500 Northlake Dr. Suite 230, Cincinnati OH 45249"
+    email         : "ryan.derickson@va.gov"
+  - name          : "Boris Yanovsky"
+    affiliation   : "2,3"
+
+affiliation:
+  - id            : "1"
+    institution   : "National Center for Organization Development"
+  - id            : "2"
+    institution   : "University of Cincinnati"
+  - id            : "3"
+    institution   : "Facebook"
+
+author_note: >
+  Complete departmental affiliations for each author (note the indentation, if you start a new paragraph).
+
+  Enter author note here.
+
+abstract: >
+  Enter abstract here (note the indentation, if you start a new paragraph).
+  
+keywords          : "R, Markdown, Reproducible Research"
+# wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+figsintext        : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+
+lang              : "english"
+class             : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r include = FALSE}
+library(papaja)
+```
+
+# Background
+Wouldn't it be nice if you could spend more time on substantive work and less time on tedious formatting?  R isn't just for running analyses - write your whole manuscript in R from start to finish and let R handle the markup!  This has many advantages:
+
+1. **Simplify your workflow**.  All your work is in one location - no more copy/paste or importing work from your analytic platform into your writing platform.  
+
+2. **Focus your effort**.  R separates the content from the markup, so you can concentrate on the writing.  You don't have to divide your attention between markup and content, because R will handle almost all the markup for you.    
+
+3. **Reduce errors**.  Because your analyses are in the same workflow as your manuscript, you *know* that your manuscript has the correct and current output.  If you modify your analyses, all your in-text results automatically update.  No more forgetting which code file does what or forgetting to update your paper if you change your analyses.  
+
+4. **Collaborate better**.  Contributors can update analyses *and* content.  This makes writing very efficient and also creates total transparency in what was done, so others can catch coding errors and see results from analyses even if they are omitted from the final manuscript.  
+
+## Math
+If your writing includes equations, you probably already know about \LaTeX.  Including equations or symbols is incredibly easy and efficient, compared to WYSIWYG text editors like Word.  And, the results look great.  For example, the 3PL IRT model is defined as:
+
+\begin{equation} \label{3PL}
+P(Y_{is} = 1 | \theta_s) = c_i + (1 - c_i) \dfrac{exp(1.7a_i(\theta_s - b_{i}))} {1 + exp(1.7a_i(\theta_s - b_{i}))}
+\end{equation}
+
+Use symbols in-line also.  For example, $\theta$ is ability, $a$ is slope, $b$ is location, and $c$ is the lower asymptote.  Refer to equations later, without having to remember which number they are, by calling their labels.  This was equation \ref{3PL}.
+
+\begin{equation} \label{2PL}
+P(Y_{is} = 1 | \theta_s) = \dfrac{exp(1.7a_i(\theta_s - b_{i}))} {1 + exp(1.7a_i(\theta_s - b_{i}))}
+\end{equation}
+
+If $c$ is 0, the 3PL reduces to the 2PL model, which is equation \ref{2PL}.  R knows the 2PL model is equation \ref{2PL} and you can rearrange the order without having to go back and update the numbers each time.
+
+## Analyses
+Include R code chunks that contain your analyses, and they will evaluate when you compile the document.  For example, reference tables created in R this way: Table \@ref(tab:3predictors), Table \@ref(tab:2predictors).  Tables are pushed to the end of the manuscript by default.  
+
+```{r 3predictors, echo=FALSE, results="asis"}
+
+model1<-lm(mpg ~ disp + hp + wt, data=mtcars)
+apa_model1<-apa_print(model1)
+apa_table(apa_model1$table, caption = "Model with displacement, horsepower, and weight")
+
+```
+
+```{r 2predictors, echo=FALSE, results="asis"}
+
+model2<-lm(mpg ~ hp + wt, data=mtcars)
+apa_model2<-apa_print(model2)
+apa_table(apa_model2$table, caption = "Model excluding displacement")
+
+```
+
+Include in-line results also, like this: ...the coefficient for horsepower in Model 2 was `r round(coef(model2)[2],2)`.  (If you're not familiar with modeling in R, you can extract parameters from the model object).  You can perform R operations in-line like the previous example, but it's usually better to do them in the R chunk to make it clearer what you're pushing to the text.
+
+
+```{r cfamodel, warning=FALSE, message=FALSE}
+library("lavaan")
+library("semPlot")
+
+# Example 5.8 from mplus user guide:
+Data <- read.table("http://www.statmodel.com/usersguide/chap5/ex5.8.dat")
+names(Data) <- c(paste("y", 1:6, sep = ""), paste("x", 1:3, sep = ""))
+
+# Model
+model.Lavaan <- "f1 =~ y1 + y2 + y3
+                 f2 =~ y4 + y5 + y6
+                 f1 + f2 ~ x1 + x2 + x3"
+
+fit <- lavaan:::cfa(model.Lavaan, data = Data, std.lv = TRUE)
+
+# Plot path diagram:
+semPaths(fit, title = FALSE, curvePivot = TRUE)
+
+```
+
+```{r conditionalTree, warning=FALSE, message=FALSE}
+
+library(party)
+
+data("GBSG2", package = "TH.data")
+GBSG2ct <- ctree(Surv(time, cens) ~ .,data = GBSG2)
+plot(GBSG2ct)
+```
+
+
+papaja supports several basic types of figures (barplots, heatmaps, etc.) but you're not limited to those - anything can be included.  Figure 1 shows a CFA, Figure 2 shows a conditional inference tree with survival analyses in the terminal nodes.
+
+
+
+# Methods
+Download the APA6 template: 
+
+```
+devtools::install_github("crsh/papaja")
+```
+
+For the analyses in this paper, you'll also need:
+
+```
+install.packages("lavaan", "rmarkdown", "devtools", "semPlot", 
+                 "knitr", "party", "TH.data", "afex")
+```
+
+To start a new manuscript, File / New / Markdown - from template - APA 6th Edition.  References pull from a .BibTeX file.  Most libraries allow you to save references in .BibTeX format when you're searching PhychInfo or other databases.  .BibTeX entries look something like this:
+
+```
+@Article{R-party_a,
+  title = {Unbiased Recursive Partitioning: A Conditional Inference Framework},
+  author = {Torsten Hothorn and Kurt Hornik and Achim Zeileis},
+  journal = {Journal of Computational and Graphical Statistics},
+  year = {2006},
+  volume = {15},
+  number = {3},
+  pages = {651--674},
+}
+```
+
+\noindent
+The first tag ("R-party_a") is the identifier for that source.  You can name it whatever you want.  Cite the source in text, @R-party_a, or parenthetically [@R-party_a].  When you compile the manuscript, R takes the references you used and creates an APA-formatted reference page automatically.  R also helpfully adds citations to your .BibTeX file based on sources cited by the authors of the packages you used in your analyses!  They do not appear in your References page unless you cite them yourself, but the entries are there for you to use if you wish.  For example, by loading the "party" package, five sources were automatically added to our .BibTeX file.  
+
+Here are more sources to make an example reference page:  @R-party_b, @R-semPlot, @R-xtable, @R-mvtnorm.
+
+
+# Applications
+1. Collaborating with colleagues  
+2. Teaching - no more horribly formatted homework, or having to guess what analyses students performed  
+3. Own work - keep your work tidy; your future self will thank you.  
+4. Publishing - many journals require APA formatting, and those that require variations can usually be easily accommodated.  Other journals have their own LaTeX templates which can be used.  All the benefits of reproducibility transfer to these situations.  
+
+
+# Example
+We'll test models predicting who survived the Titanic sinking, to illustrate some of the ideas and advantages of reproducible research in R.  Change the models, and see how accurately you can predict who survived the Titanic.  Also note how any part of the analyses you do here could be pulled into the manuscript, if this was the research topic.  
+
+```{r titanic, include=FALSE}
+
+# Load the test and train sets
+train<-read.csv(file="C:/Users/VHACINDericR/Desktop/SIOP/titanic train.csv", head=TRUE, sep=",")
+# test<-read.csv(file="C:/Users/VHACINDericR/Desktop/SIOP/titanic test.csv", head=TRUE, sep=",")
+# testkey<-read.csv(file="C:/Users/VHACINDericR/Desktop/SIOP/titanic survival.csv", head=TRUE, sep=",")
+
+str(train)
+
+# logistic regression with class, sex, age, and port of embarkation as predictors
+model1<-glm(Survived ~ Pclass + Sex + Age + Embarked, data=train, 
+            family=binomial(link="logit"))
+
+summary(model1)
+
+# look at the deviance of the model - how does our model do against the null model with only an intercept?
+anova(model1, test="Chisq")
+
+# logistic regression with class, sex, age, and port of embarkation as predictors
+model2<-glm(Survived ~ Pclass + Sex + Age + SibSp, data=train, 
+            family=binomial(link="logit"))
+
+summary(model2)
+
+anova(model2, test="Chisq")
+
+predict1<-round(predict(model1, newdata=train, type="response"), 0)
+predict2<-round(predict(model2, newdata=train, type="response"), 0)
+
+par(mfrow=c(1,2))
+
+plot(table(predict1, train$Survived), main="Model1", las=1)
+plot(table(predict2, train$Survived), main="Model2", las=1)
+
+sum(diag(table(predict1, train$Survived))) / nrow(train)
+sum(diag(table(predict2, train$Survived))) / nrow(train)
+
+```
+
+
+# Notes
+* Can be compiled to .PDF or .DOC, but a bit of manual formatting might be necessary with .DOC.  
+* Most markup can be either Markdown syntax (e.g., "**" = bold), or \LaTeX (e.g., "\\textbf{}")  
+* Complete reference guide is available at: https://github.com/crsh/papaja/blob/master/vignettes/papaja_vignette.Rmd  
+
+
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
