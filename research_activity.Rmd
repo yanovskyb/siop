@@ -9,7 +9,7 @@ bibliography: refs.bib
 
 ```{r, echo = FALSE, warning = FALSE}
 library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, dpi = 300)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, dpi = 350)
 options(width=80)
 ```
 
