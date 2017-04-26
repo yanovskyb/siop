@@ -121,8 +121,8 @@ for_graph = melt(bfi[,c("agree", "con", "extra", "open", "neur", "gender")], id.
 Alright, now let's take a look at these group differences by running some boxplots.
 
 ```{r, fig.width=1.7, fig.height=1.7, fig.align='center', cache = FALSE}
-plot_ly(for_graph, x = variable, y = value, color = as.factor(gender), type = "box") %>%
-  layout(boxmode = "group")
+library(dplyr)
+plot_ly(for_graph, x = ~variable, y = ~value, color = as.factor(for_graph$gender), type = "box") %>% layout(boxmode = "group")
 ```
 
 Here we can see a little bit of a broader picture of some personality differences between males and females. After all this hard work, we are now ready to share our results with our colleagues. We can simply send them this Markdown file with the data, which includes the code and our notes, to get their input into this project.
