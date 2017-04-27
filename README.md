@@ -1,5 +1,5 @@
-# SIOP 2017 Master Tutorial
-## Making Research Reproducible: Tutorial for Reproducible Research with R Markdown
+# SIOP 2017: Orlando, FL
+## Making Research Reproducible: Tutorial for Reproducible Research with R Markdown (April 29th, 2017)
 
 This GitHub repository contains all of the code, data files, and other resources that we'll be going over during our session on Saturday, April 29th at 10:00am.
 
